@@ -44,58 +44,99 @@ class PreAlignTrackerWidget(ScriptedLoadableModuleWidget):
     #
     # Select models for prealignment
     #
-    parametersCollapsibleButton = ctk.ctkCollapsibleButton()
-    parametersCollapsibleButton.text = "Select Models"
-    self.layout.addWidget(parametersCollapsibleButton)
+    model_select_collapsible_button = ctk.ctkCollapsibleButton()
+    model_select_collapsible_button.text = "Select Models"
+    self.layout.addWidget(model_select_collapsible_button)
 
     # Layout within the dummy collapsible button
-    parametersFormLayout = qt.QFormLayout(parametersCollapsibleButton)
+    model_select_form_layout = qt.QFormLayout(model_select_collapsible_button)
 
     #
     # Select segmented optical scan of tracker
     #
     self.optical_tracker_model_selector = slicer.qMRMLNodeComboBox()
     self.optical_tracker_model_selector.nodeTypes = ["vtkMRMLModelNode"]
-    self.optical_tracker_model_selector.selectNodeUponCreation = True
+    self.optical_tracker_model_selector.selectNodeUponCreation = False
     self.optical_tracker_model_selector.addEnabled = False
+    self.optical_tracker_model_selector.renameEnabled = True
     self.optical_tracker_model_selector.removeEnabled = True
     self.optical_tracker_model_selector.noneEnabled = False
     self.optical_tracker_model_selector.showHidden = False
     self.optical_tracker_model_selector.showChildNodeTypes = False
     self.optical_tracker_model_selector.setMRMLScene(slicer.mrmlScene)
     self.optical_tracker_model_selector.setToolTip("Choose the Optical Image of the Segmented Tracker")
-    parametersFormLayout.addRow("Optical Image of Tracker: ", self.optical_tracker_model_selector)
+    model_select_form_layout.addRow("Optical Image of Tracker: ", self.optical_tracker_model_selector)
 
     #
     # Select template model of tracker
     #
     self.template_tracker_model_selector = slicer.qMRMLNodeComboBox()
     self.template_tracker_model_selector.nodeTypes = ["vtkMRMLModelNode"]
-    self.template_tracker_model_selector.selectNodeUponCreation = True
+    self.template_tracker_model_selector.selectNodeUponCreation = False
     self.template_tracker_model_selector.addEnabled = False
     self.template_tracker_model_selector.removeEnabled = True
+    self.template_tracker_model_selector.renameEnabled = True
     self.template_tracker_model_selector.noneEnabled = False
     self.template_tracker_model_selector.showHidden = False
     self.template_tracker_model_selector.showChildNodeTypes = False
     self.template_tracker_model_selector.setMRMLScene(slicer.mrmlScene)
     self.template_tracker_model_selector.setToolTip("Choose the template Model of the Tracker.")
-    parametersFormLayout.addRow("Template Model of the Tracker: ", self.template_tracker_model_selector)
+    model_select_form_layout.addRow("Template Model of the Tracker: ", self.template_tracker_model_selector)
 
     #
-    # Run prealign -- Here we want to run our automation for prealignment
+    # Select and/or create fiducials for moving and fixed
     #
-    self.fixed_markups
+    fiducials_select_collapsible_button = ctk.ctkCollapsibleButton()
+    fiducials_select_collapsible_button.text = "Select Markups Fiducials"
+    self.layout.addWidget(fiducials_select_collapsible_button)
+
+    # Layout within the dummy collapsible button
+    fiducials_select_form_layout = qt.QFormLayout(fiducials_select_collapsible_button)
 
     #
-    # Apply Button
+    # Moving Fiducial Selector
     #
-    self.applyButton = qt.QPushButton("Apply")
-    self.applyButton.toolTip = "Run the algorithm."
-    self.applyButton.enabled = False
-    parametersFormLayout.addRow(self.applyButton)
+    self.moving_markup_selector = slicer.qMRMLNodeComboBox()
+    self.moving_markup_selector.nodeTypes = ["vtkMRMLMarkupsFiducialNode"]
+    self.moving_markup_selector.selectNodeUponCreation = False
+    self.moving_markup_selector.addEnabled = True
+    self.moving_markup_selector.removeEnabled = True
+    self.moving_markup_selector.renameEnabled = True
+    self.moving_markup_selector.noneEnabled = False
+    self.moving_markup_selector.showHidden = False
+    self.moving_markup_selector.showChildNodeTypes = False
+    self.moving_markup_selector.setMRMLScene(slicer.mrmlScene)
+    self.moving_markup_selector.setToolTip("Choose the Moving Markups Fiducial.")
+    fiducials_select_form_layout.addRow("Moving Markups Fiducial: ", self.moving_markup_selector)
+
+    #
+    # Fixed Fiducial Selector
+    #
+    self.fixed_markup_selector = slicer.qMRMLNodeComboBox()
+    self.fixed_markup_selector.nodeTypes = ["vtkMRMLMarkupsFiducialNode"]
+    self.fixed_markup_selector.selectNodeUponCreation = False
+    self.fixed_markup_selector.addEnabled = True
+    self.fixed_markup_selector.removeEnabled = True
+    self.fixed_markup_selector.renameEnabled = True
+    self.fixed_markup_selector.noneEnabled = False
+    self.fixed_markup_selector.showHidden = False
+    self.fixed_markup_selector.showChildNodeTypes = False
+    self.fixed_markup_selector.setMRMLScene(slicer.mrmlScene)
+    self.fixed_markup_selector.setToolTip("Choose the Fixed Markups Fiducial.")
+    fiducials_select_form_layout.addRow("Fixed Markups Fiducial: ", self.fixed_markup_selector)
+
+    #
+    # Add Fiducials --> Moving, Fixed
+    #
+    self.add_fiducials = qt.QPushButton("Add Fiducials to Models")
+    self.add_fiducials.toolTip = "Place at least three fiducials on each model."
+    self.add_fiducials.enabled = False
+    fiducials_select_form_layout.addRow(self.add_fiducials)
 
     # connections
-    self.applyButton.connect('clicked(bool)', self.onApplyButton)
+    self.add_fiducials.connect('clicked(bool)', self.place_moving_fiducials)
+    self.moving_markup_selector.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
+    self.fixed_markup_selector.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
     self.optical_tracker_model_selector.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
     self.template_tracker_model_selector.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
 
@@ -109,13 +150,21 @@ class PreAlignTrackerWidget(ScriptedLoadableModuleWidget):
     pass
 
   def onSelect(self):
-    self.applyButton.enabled = self.optical_tracker_model_selector.currentNode() and self.template_tracker_model_selector.currentNode()
+    self.add_fiducials.enabled = self.optical_tracker_model_selector.currentNode() and \
+                                 self.template_tracker_model_selector.currentNode() and \
+                                 self.optical_tracker_model_selector.currentNode() is not \
+                                 self.template_tracker_model_selector.currentNode() and \
+                                 self.fixed_markup_selector.currentNode() is not \
+                                 self.moving_markup_selector.currentNode()
 
-  def onApplyButton(self):
+  def start_moving_fiducial_select(self):
     logic = PreAlignTrackerLogic()
     enableScreenshotsFlag = self.enableScreenshotsFlagCheckBox.checked
     imageThreshold = self.imageThresholdSliderWidget.value
     logic.run(self.optical_tracker_model_selector.currentNode(), self.template_tracker_model_selector.currentNode(), imageThreshold, enableScreenshotsFlag)
+
+  def place_moving_fiducials(self):
+
 
 #
 # PreAlignTrackerLogic
