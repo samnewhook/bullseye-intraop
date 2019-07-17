@@ -55,10 +55,10 @@ class PreAlignTrackerWidget(ScriptedLoadableModuleWidget):
     # Select segmented optical scan of tracker
     #
     self.optical_tracker_model_selector = slicer.qMRMLNodeComboBox()
-    self.optical_tracker_model_selector.nodeTypes = ["vtkMRMLScalarVolumeNode"]
+    self.optical_tracker_model_selector.nodeTypes = ["vtkMRMLModelNode"]
     self.optical_tracker_model_selector.selectNodeUponCreation = True
     self.optical_tracker_model_selector.addEnabled = False
-    self.optical_tracker_model_selector.removeEnabled = False
+    self.optical_tracker_model_selector.removeEnabled = True
     self.optical_tracker_model_selector.noneEnabled = False
     self.optical_tracker_model_selector.showHidden = False
     self.optical_tracker_model_selector.showChildNodeTypes = False
@@ -67,14 +67,14 @@ class PreAlignTrackerWidget(ScriptedLoadableModuleWidget):
     parametersFormLayout.addRow("Optical Image of Tracker: ", self.optical_tracker_model_selector)
 
     #
-    # Select vtk model of tracker
+    # Select template model of tracker
     #
     self.template_tracker_model_selector = slicer.qMRMLNodeComboBox()
-    self.template_tracker_model_selector.nodeTypes = ["vtkMRMLScalarVolumeNode"]
+    self.template_tracker_model_selector.nodeTypes = ["vtkMRMLModelNode"]
     self.template_tracker_model_selector.selectNodeUponCreation = True
-    self.template_tracker_model_selector.addEnabled = True
+    self.template_tracker_model_selector.addEnabled = False
     self.template_tracker_model_selector.removeEnabled = True
-    self.template_tracker_model_selector.noneEnabled = True
+    self.template_tracker_model_selector.noneEnabled = False
     self.template_tracker_model_selector.showHidden = False
     self.template_tracker_model_selector.showChildNodeTypes = False
     self.template_tracker_model_selector.setMRMLScene(slicer.mrmlScene)
@@ -82,12 +82,9 @@ class PreAlignTrackerWidget(ScriptedLoadableModuleWidget):
     parametersFormLayout.addRow("Template Model of the Tracker: ", self.template_tracker_model_selector)
 
     #
-    # check box to trigger taking screen shots for later use in tutorials
+    # Run prealign -- Here we want to run our automation for prealignment
     #
-    self.enableScreenshotsFlagCheckBox = qt.QCheckBox()
-    self.enableScreenshotsFlagCheckBox.checked = 0
-    self.enableScreenshotsFlagCheckBox.setToolTip("If checked, take screen shots for tutorials. Use Save Data to write them to disk.")
-    parametersFormLayout.addRow("Enable Screenshots", self.enableScreenshotsFlagCheckBox)
+    self.fixed_markups
 
     #
     # Apply Button
