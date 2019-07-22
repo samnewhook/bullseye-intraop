@@ -40,7 +40,7 @@ Fully constraining the optical tracker when performing surface registration from
 <!--Add pictures and links to videos that demonstrate what has been accomplished.-->
 
 <!--![Description of picture](Example2.jpg)-->
-[Data Flow Diagram for Module 1: Prealign optical image of tracker and tracker model](Bullseye_Data_Flow_Module_1.png)
+[Data Flow Diagram for Module 1: Prealign optical image of tracker and tracker model](image_resources/Bullseye_Data_Flow_Module_1.png)
 <!--![Some more images](Example2.jpg)-->
 
 # Background and References
