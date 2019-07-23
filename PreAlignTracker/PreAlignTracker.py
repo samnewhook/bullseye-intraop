@@ -2,7 +2,6 @@ import os
 import unittest
 import vtk, qt, ctk, slicer
 from slicer.ScriptedLoadableModule import *
-from
 import logging
 
 #
@@ -147,9 +146,14 @@ class PreAlignTrackerWidget(ScriptedLoadableModuleWidget):
         # Perform Fiducial Registration
         #
         self.fiducial_registration_button = qt.QPushButton("Perform Fiducial Registration")
-        self.fiducial_registration_button.tooltip = "Perform default fiducial registration."
+        self.fiducial_registration_button.toolTip = "Perform default fiducial registration."
         self.fiducial_registration_button.enabled = True
         fiducials_select_form_layout.addRow(self.fiducial_registration_button)
+
+        #
+        # Import Logic from Fiducial Registration
+        #
+        self.logic = PreAlignTrackerLogic()
 
         # connections
         self.add_moving_fiducials.connect('clicked(bool)', lambda: self.toggle_placing_fiducials(self.moving_markup_selector))
@@ -158,13 +162,18 @@ class PreAlignTrackerWidget(ScriptedLoadableModuleWidget):
         self.fixed_markup_selector.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
         self.optical_tracker_model_selector.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
         self.template_tracker_model_selector.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
-        self.fiducial_registration_button.connect('clicked(bool)', )
+        self.fiducial_registration_button.connect('clicked(bool)', self.logic.run)
 
         # Add vertical spacer
         self.layout.addStretch(1)
 
         # Refresh Apply button state
         self.onSelect()
+
+    def run_fiducial_registration(self):
+        parameters = {'fixedLandmarks': self.fixed_markup_selector.currentNode(),
+                'movingLandmarks': self.moving_markup_selector.currentNode(),
+                'saveTransform': None}
 
     def cleanup(self):
         pass
@@ -222,33 +231,6 @@ class PreAlignTrackerLogic(ScriptedLoadableModuleLogic):
     Uses ScriptedLoadableModuleLogic base class, available at:
     https://github.com/Slicer/Slicer/blob/master/Base/Python/slicer/ScriptedLoadableModule.py
     """
-
-    def hasImageData(self,volumeNode):
-        """This is an example logic method that
-        returns true if the passed in volume
-        node has valid image data
-        """
-        if not volumeNode:
-            logging.debug('hasImageData failed: no volume node')
-            return False
-        if volumeNode.GetImageData() is None:
-            logging.debug('hasImageData failed: no image data in volume node')
-            return False
-        return True
-
-    def isValidInputOutputData(self, inputVolumeNode, outputVolumeNode):
-        """Validates if the output is not the same as input
-        """
-        if not inputVolumeNode:
-            logging.debug('isValidInputOutputData failed: no input volume node defined')
-            return False
-        if not outputVolumeNode:
-            logging.debug('isValidInputOutputData failed: no output volume node defined')
-            return False
-        if inputVolumeNode.GetID()==outputVolumeNode.GetID():
-            logging.debug('isValidInputOutputData failed: input and output volume is the same. Create a new volume for output to avoid this error.')
-            return False
-        return True
 
     def run(self, input_volume, output_volume):
         """
