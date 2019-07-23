@@ -1,4 +1,4 @@
-## Bullseye - Computer Vision for the glenoid implant in total shoulder arthroplasty
+# Bullseye - Computer Vision for the glenoid implant in total shoulder arthroplasty
 
 ## Key Investigators
 - David M. Burns, MD, PhD(c) (Sunnybrook Research Institute) 
@@ -13,7 +13,6 @@ Positioning of the glenoid component in total shoulder arthroplasty is a challen
 2. Automatic import of optical scan into slicer. As it stands, the optical image must be taken and loaded manually.
 
 ## Approach and Plan
-
 1. Targeting the automation of intra-operative image processing steps. These are as follows:
     1. Segmentation of tracker and glenoid from intra-operative optical image 
     2. Pre-alignment for optical tracker registration
@@ -28,12 +27,11 @@ Positioning of the glenoid component in total shoulder arthroplasty is a challen
 4. Create a workflow module for linking steps (handle workflow logic)
 
 ## Progress and Next Steps
-
 <!--Describe progress and next steps in a few bullet points as you are making progress.-->
 Created simple data flow diagram for the first module. Next is to sketchup module design and implement in Slicer.
 
 ### Notes
-Fully constraining the optical tracker when performing surface registration from the optical image to the model is important. Some issues with the shape of the tracker were discussed incuding the need for at least two clear faces to be visible when taking the optical images. Sharp angles subtended between the faces are important for constraining, however, with sharp edges and a single fixed scan it is difficult to image both faces clearly.
+The shape of the marker is essentially a cone with the top cut off. The optical image only needs to capture the curved face to some degree. The gradient of the curvature ensures that an incomplete surface area captured will be enough to constrain the surface registration along the length of the cone. Due to the symmetrical nature of the wire and tracker, the surface registration of the optical image face to the model face does not need to be constrained around the radius of the tracker face. 
 
 # Illustrations
 
