@@ -2,6 +2,7 @@ import os
 import unittest
 import vtk, qt, ctk, slicer
 from slicer.ScriptedLoadableModule import *
+from
 import logging
 
 #
@@ -157,6 +158,7 @@ class PreAlignTrackerWidget(ScriptedLoadableModuleWidget):
         self.fixed_markup_selector.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
         self.optical_tracker_model_selector.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
         self.template_tracker_model_selector.connect("currentNodeChanged(vtkMRMLNode*)", self.onSelect)
+        self.fiducial_registration_button.connect('clicked(bool)', )
 
         # Add vertical spacer
         self.layout.addStretch(1)
